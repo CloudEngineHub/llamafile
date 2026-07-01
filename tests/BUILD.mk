@@ -157,6 +157,24 @@ o/$(MODE)/tests/backend_ops_test: \
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # ==============================================================================
+# Smoke test: transcribefile APE
+# ==============================================================================
+#
+# Subprocess-style regression on the transcribefile binary itself.
+#   Layer 1: model-free probes (--help, WAV duration line) — always runs.
+#   Layer 2: parakeet end-to-end, gated on TRANSCRIBEFILE_PARAKEET_GGUF
+#            (skip-on-missing, never fails `make check` for absent model).
+# The script is the test; we don't have an executable to plug %.runs into,
+# so we define a one-off recipe that emits the stamp on success.
+
+o/$(MODE)/tests/transcribefile_smoke.runs: \
+		o/$(MODE)/transcribefile/transcribefile \
+		tests/transcribefile_smoke.sh
+	@mkdir -p $(@D)
+	bash tests/transcribefile_smoke.sh o/$(MODE)/transcribefile/transcribefile
+	@touch $@
+
+# ==============================================================================
 # Phony targets
 # ==============================================================================
 
@@ -164,4 +182,5 @@ o/$(MODE)/tests/backend_ops_test: \
 o/$(MODE)/tests: \
 	o/$(MODE)/tests/extract_data_uris_test.runs \
 	o/$(MODE)/tests/fa_helpers_test.runs \
-	o/$(MODE)/tests/gpu_backend_test.runs
+	o/$(MODE)/tests/gpu_backend_test.runs \
+	o/$(MODE)/tests/transcribefile_smoke.runs
